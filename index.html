@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Premium Parking | Next-Gen Reservation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --success: #4ad66d;
+            --warning: #f8961e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        nav ul {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            color: #6c757d;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+        
+        #parking-container {
+            width: 100%;
+            height: 60vh;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        #parking-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .scene-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .control-btn i {
+            font-size: 18px;
+            color: var(--dark);
+        }
+        
+        .reservation-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        #reservation-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        
+        #reservation-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .date-selector {
+            position: relative;
+        }
+        
+        .date-selector::after {
+            content: '📅';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        
+        #time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+        
+        .time-slot {
+            padding: 0.75rem;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .time-slot:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .time-slot.unavailable {
+            background: #f8f9fa;
+            color: #adb5bd;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        
+        #confirm-reservation {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        #confirm-reservation:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+        
+        .feature-card p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-column a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #adb5bd;
+        }
+        
+        /* Animation classes */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .reservation-section {
+                grid-template-columns: 1fr;
+            }
+            
+            #reservation-panel {
+                position: static;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-parking"></i>
+            </div>
+            <span>3DPark</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Pricing</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <h1>Premium Parking Made Simple</h1>
+            <p>Reserve your spot in our state-of-the-art parking facility with real-time 3D visualization and seamless booking experience.</p>
+        </section>
+        
+        <div id="parking-container">
+            <canvas id="parking-canvas"></canvas>
+            <div class="scene-controls">
+                <button class="control-btn" id="reset-view"><i class="fas fa-crosshairs"></i></button>
+                <button class="control-btn" id="toggle-animation"><i class="fas fa-play"></i></button>
+                <button class="control-btn" id="toggle-lights"><i class="fas fa-lightbulb"></i></button>
+            </div>
+        </div>
+        
+        <div class="reservation-section">
+            <div>
+                <h2>Interactive 3D Parking</h2>
+                <p>Our advanced 3D visualization lets you explore the parking facility before you arrive. Click and drag to rotate the view, scroll to zoom, and watch as our smart navigation system guides a virtual car to available spots.</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <h3>Smart Navigation</h3>
+                        <p>Our system automatically guides you to the best available spot based on your preferences and current availability.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>EV Charging</h3>
+                        <p>Reserve spots with electric vehicle charging stations and monitor your charging status in real-time.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>AI Assistance</h3>
+                        <p>Our AI learns your parking habits to suggest optimal times and locations for future reservations.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reservation-panel">
+                <h2>Reserve Your Spot</h2>
+                <div class="form-group">
+                    <label for="reservation-date">Select Date</label>
+                    <div class="date-selector">
+                        <input type="date" id="reservation-date" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Time Slot</label>
+                    <div id="time-slots">
+                        <!-- Generated dynamically -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="vehicle-type">Vehicle Type</label>
+                    <select id="vehicle-type" class="form-control">
+                        <option value="standard">Standard Vehicle</option>
+                        <option value="large">Large Vehicle</option>
+                        <option value="electric">Electric Vehicle</option>
+                        <option value="motorcycle">Motorcycle</option>
+                    </select>
+                </div>
+                
+                <button id="confirm-reservation">
+                    <i class="fas fa-check-circle"></i> Confirm Reservation
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>3DPark</h3>
+                <p>Revolutionizing parking with 3D visualization and AI-powered reservation systems.</p>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> 123 Park Ave, City</li>
+                    <li><i class="fas fa-phone"></i> (123) 456-7890</li>
+                    <li><i class="fas fa-envelope"></i> info@3dpark.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2023 3DPark. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+    <script>
+        // Enhanced 3D Parking Scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.6), 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('parking-canvas'), 
+            antialias: true,
+            powerPreference: "high-performance"
+        });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight * 0.6);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // Improved lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 20, 10);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 500;
+        directionalLight.shadow.camera.left = -50;
+        directionalLight.shadow.camera.right = 50;
+        directionalLight.shadow.camera.top = 50;
+        directionalLight.shadow.camera.bottom = -50;
+        scene.add(directionalLight);
+        
+        const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
+        scene.add(hemisphereLight);
+        
+        // Parking lot with improved materials
+        const parkingGeometry = new THREE.BoxGeometry(40, 0.2, 20);
+        const parkingMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x333333,
+            roughness: 0.7,
+            metalness: 0.1
+        });
+        const parkingLot = new THREE.Mesh(parkingGeometry, parkingMaterial);
+        parkingLot.receiveShadow = true;
+        parkingLot.position.y = -0.1;
+        scene.add(parkingLot);
+        
+        // Parking lines with reflective material
+        for (let i = -8; i <= 8; i += 4) {
+            const lineGeometry = new THREE.BoxGeometry(35, 0.21, 0.3);
+            const lineMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff,
+                emissive: 0x444444,
+                emissiveIntensity: 0.2,
+                roughness: 0.3,
+                metalness: 0.5
+            });
+            const line = new THREE.Mesh(lineGeometry, lineMaterial);
+            line.position.set(0, 0.1, i);
+            line.receiveShadow = true;
+            scene.add(line);
+        }
+        
+        // Parking columns for depth
+        for (let i = -18; i <= 18; i += 9) {
+            const columnGeometry = new THREE.CylinderGeometry(0.3, 0.3, 3, 8);
+            const columnMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xaaaaaa,
+                roughness: 0.5,
+                metalness: 0.3
+            });
+            const column = new THREE.Mesh(columnGeometry, columnMaterial);
+            column.position.set(i, 1.5, -10);
+            column.castShadow = true;
+            scene.add(column);
+            
+            const column2 = column.clone();
+            column2.position.set(i, 1.5, 10);
+            scene.add(column2);
+        }
+        
+        // Improved car model with more details
+        const createCar = () => {
+            const car = new THREE.Group();
+            
+            // Car body
+            const bodyGeometry = new THREE.BoxGeometry(3.5, 1.2, 1.8);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x0066cc,
+                roughness: 0.3,
+                metalness: 0.7,
+                clearcoat: 1,
+                clearcoatRoughness: 0.1
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            body.receiveShadow = true;
+            car.add(body);
+            
+            // Car roof
+            const roofGeometry = new THREE.BoxGeometry(2.8, 0.3, 1.4);
+            const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+            const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+            roof.position.y = 0.8;
+            roof.castShadow = true;
+            car.add(roof);
+            
+            // Windows
+            const windowGeometry = new THREE.BoxGeometry(2.8, 0.6, 1.4);
+            const windowMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x7ec0ee,
+                transmission: 0.8,
+                roughness: 0.1,
+                metalness: 0.1,
+                clearcoat: 1,
+                clearcoatRoughness: 0.1,
+                ior: 1.4,
+                thickness: 0.05
+            });
+            const windows = new THREE.Mesh(windowGeometry, windowMaterial);
+            windows.position.y = 0.65;
+            car.add(windows);
+            
+            // Wheels
+            const wheelGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 32);
+            const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const wheelPositions = [
+                { x: 1.2, y: -0.4, z: 0.9 },
+                { x: -1.2, y: -0.4, z: 0.9 },
+                { x: 1.2, y: -0.4, z: -0.9 },
+                { x: -1.2, y: -0.4, z: -0.9 }
+            ];
+            
+            wheelPositions.forEach(pos => {
+                const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                wheel.position.set(pos.x, pos.y, pos.z);
+                wheel.rotation.z = Math.PI / 2;
+                wheel.castShadow = true;
+                car.add(wheel);
+                
+                // Wheel rim
+                const rimGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.21, 16);
+                const rimMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xcccccc,
+                    roughness: 0.2,
+                    metalness: 0.9
+                });
+                const rim = new THREE.Mesh(rimGeometry, rimMaterial);
+                rim.position.set(pos.x, pos.y, pos.z);
+                rim.rotation.z = Math.PI / 2;
+                car.add(rim);
+            });
+            
+            // Headlights
+            const headlightGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const headlightMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffcc,
+                emissive: 0xffff99,
+                emissiveIntensity: 2
+            });
+            
+            const leftHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
+            leftHeadlight.position.set(1.75, 0.1, 0.6);
+            car.add(leftHeadlight);
+            
+            const rightHeadlight = leftHeadlight.clone();
+            rightHeadlight.position.set(1.75, 0.1, -0.6);
+            car.add(rightHeadlight);
+            
+            // Taillights
+            const taillightGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const taillightMaterial = new THREE.MeshStandardMaterial({
+                color: 0xff3333,
+                emissive: 0xff0000,
+                emissiveIntensity: 2
+            });
+            
+            const leftTaillight = new THREE.Mesh(taillightGeometry, taillightMaterial);
+            leftTaillight.position.set(-1.75, 0.1, 0.6);
+            car.add(leftTaillight);
+            
+            const rightTaillight = leftTaillight.clone();
+            rightTaillight.position.set(-1.75, 0.1, -0.6);
+            car.add(rightTaillight);
+            
+            return car;
+        };
+        
+        const car = createCar();
+        car.position.set(-25, 0.6, 0);
+        car.castShadow = true;
+        scene.add(car);
+        
+        // Add parking spot markers
+        const spotGeometry = new THREE.BoxGeometry(3, 0.1, 2);
+        const spotMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x4CAF50,
+            transparent: true,
+            opacity: 0.7,
+            emissive: 0x4CAF50,
+            emissiveIntensity: 0.2
+        });
+        
+        const spots = [];
+        for (let i = -6; i <= 6; i += 4) {
+            for (let j = -15; j <= 15; j += 6) {
+                const spot = new THREE.Mesh(spotGeometry, spotMaterial.clone());
+                spot.position.set(j, 0.11, i);
+                spot.visible = false;
+                scene.add(spot);
+                spots.push(spot);
+            }
+        }
+        
+        // Add environment elements
+        const addEnvironment = () => {
+            // Floor grid
+            const gridHelper = new THREE.GridHelper(60, 60, 0x888888, 0xcccccc);
+            gridHelper.position.y = -0.11;
+            scene.add(gridHelper);
+            
+            // Ceiling
+            const ceilingGeometry = new THREE.BoxGeometry(50, 0.2, 25);
+            const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd });
+            const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+            ceiling.position.y = 5;
+            ceiling.receiveShadow = true;
+            scene.add(ceiling);
+            
+            // Ceiling lights
+            for (let i = -20; i <= 20; i += 10) {
+                for (let j = -10; j <= 10; j += 10) {
+                    const lightGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+                    const lightMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xffffcc,
+                        emissive: 0xffff99,
+                        emissiveIntensity: 2
+                    });
+                    const lightBulb = new THREE.Mesh(lightGeometry, lightMaterial);
+                    lightBulb.position.set(i, 4.8, j);
+                    scene.add(lightBulb);
+                    
+                    const pointLight = new THREE.PointLight(0xffffcc, 1, 10);
+                    pointLight.position.set(i, 4.5, j);
+                    pointLight.castShadow = true;
+                    pointLight.shadow.mapSize.width = 512;
+                    pointLight.shadow.mapSize.height = 512;
+                    pointLight.shadow.camera.near = 0.5;
+                    pointLight.shadow.camera.far = 500;
+                    scene.add(pointLight);
+                }
+            }
+        };
+        
+        addEnvironment();
+        
+        camera.position.set(0, 10, 20);
+        camera.lookAt(0, 0, 0);
+        
+        // Controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 5;
+        controls.maxDistance = 50;
+        controls.maxPolarAngle = Math.PI * 0.8;
+        
+        // Animation variables
+        let carMoving = false;
+        let carPosition = -25;
+        let targetSpot = null;
+        let animationState = 'idle'; // 'idle', 'moving', 'parking'
+        let wheelRotation = 0;
+        
+        // Car animation states
+        const animateCar = () => {
+            if (!carMoving) return;
+            
+            wheelRotation += 0.1;
+            car.children.forEach((child, index) => {
+                if (index >= 4 && index <= 7) { // Wheels
+                    child.rotation.x = wheelRotation;
+                    if (index === 4 || index === 6) { // Front wheels
+                        child.rotation.z = Math.PI/2 + Math.sin(wheelRotation * 2) * 0.2;
+                    }
+                }
+            });
+            
+            if (animationState === 'moving') {
+                if (carPosition < 25) {
+                    carPosition += 0.08;
+                    car.position.x = carPosition;
+                    
+                    // Slight suspension movement
+                    car.position.y = 0.6 + Math.sin(Date.now() * 0.01) * 0.03;
+                    
+                    // Camera follows car
+                    camera.position.x = carPosition * 0.7;
+                    camera.lookAt(car.position.x, 0, 0);
+                    
+                    // Headlights and taillights animation
+                    const headlightIntensity = 2 + Math.sin(Date.now() * 0.05) * 0.5;
+                    car.children[8].material.emissiveIntensity = headlightIntensity;
+                    car.children[9].material.emissiveIntensity = headlightIntensity;
+                } else {
+                    carPosition = -25;
+                }
+            } else if (animationState === 'parking' && targetSpot) {
+                // More complex parking animation would go here
+                // For now just move toward the spot
+                const targetPosition = targetSpot.position.clone();
+                targetPosition.y = 0.6;
+                
+                const direction = new THREE.Vector3().subVectors(targetPosition, car.position).normalize();
+                const speed = 0.05;
+                
+                if (car.position.distanceTo(targetPosition) > 0.5) {
+                    car.position.add(direction.multiplyScalar(speed));
+                    car.lookAt(targetPosition);
+                    
+                    // Camera follows car
+                    camera.position.copy(car.position).add(new THREE.Vector3(-5, 5, 0));
+                    camera.lookAt(car.position);
+                } else {
+                    animationState = 'idle';
+                    document.getElementById('toggle-animation').innerHTML = '<i class="fas fa-play"></i>';
+                }
+            }
+        };
+        
+        // Handle spot selection
+        const selectSpot = (spot) => {
+            spots.forEach(s => {
+                s.material.color.setHex(0x4CAF50);
+                s.material.emissive.setHex(0x4CAF50);
+            });
+            
+            spot.material.color.setHex(0xFF5722);
+            spot.material.emissive.setHex(0xFF5722);
+            targetSpot = spot;
+            
+            // Start parking animation
+            animationState = 'parking';
+            carMoving = true;
+            document.getElementById('toggle-animation').innerHTML = '<i class="fas fa-pause"></i>';
+        };
+        
+        // Raycaster for spot selection
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        const onMouseClick = (event) => {
+            if (!controls.enabled) return;
+            
+            // Calculate mouse position in normalized device coordinates
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / (window.innerHeight * 0.6)) * 2 + 1;
+            
+            // Update the raycaster
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Calculate objects intersecting the ray
+            const intersects = raycaster.intersectObjects(spots);
+            
+            if (intersects.length > 0) {
+                selectSpot(intersects[0].object);
+            }
+        };
+        
+        renderer.domElement.addEventListener('click', onMouseClick, false);
+        
+        // Animation loop
+        const animate = () => {
+            requestAnimationFrame(animate);
+            
+            if (carMoving) {
+                animateCar();
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        };
+        
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / (window.innerHeight * 0.6);
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight * 0.6);
+        });
+        
+        // Control buttons
+        document.getElementById('reset-view').addEventListener('click', () => {
+            controls.reset();
+            camera.position.set(0, 10, 20);
+            camera.lookAt(0, 0, 0);
+        });
+        
+        document.getElementById('toggle-animation').addEventListener('click', function() {
+            carMoving = !carMoving;
+            if (animationState === 'idle') {
+                animationState = 'moving';
+            }
+            this.innerHTML = carMoving ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        });
+        
+        document.getElementById('toggle-lights').addEventListener('click', function() {
+            directionalLight.visible = !directionalLight.visible;
+            hemisphereLight.visible = !hemisphereLight.visible;
+            this.innerHTML = directionalLight.visible ? '<i class="fas fa-lightbulb"></i>' : '<i class="fas fa-lightbulb" style="color: var(--warning)"></i>';
+        });
+        
+        // Generate time slots with some random unavailable slots
+        const timeSlotsContainer = document.getElementById('time-slots');
+        for (let hour = 8; hour < 20; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                timeSlot.textContent = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                
+                // Randomly mark some slots as unavailable
+                if (Math.random() > 0.7) {
+                    timeSlot.classList.add('unavailable');
+                    timeSlot.title = 'This slot is already booked';
+                } else {
+                    timeSlot.addEventListener('click', function() {
+                        document.querySelectorAll('.time-slot').forEach(slot => {
+                            slot.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                        
+                        // Show available spots
+                        spots.forEach(spot => spot.visible = true);
+                        
+                        // Randomly select a spot to demonstrate
+                        if (spots.length > 0 && Math.random() > 0.5) {
+                            const randomSpot = spots[Math.floor(Math.random() * spots.length)];
+                            selectSpot(randomSpot);
+                        }
+                    });
+                }
+                
+                timeSlotsContainer.appendChild(timeSlot);
+            }
+        }
+        
+        // Reservation confirmation
+        document.getElementById('confirm-reservation').addEventListener('click', function() {
+            const selectedSlot = document.querySelector('.time-slot.selected');
+            if (!selectedSlot) {
+                alert('Please select a time slot first');
+                return;
+            }
+            
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-check-circle"></i> Reservation Confirmed!';
+                
+                // Show confirmation animation
+                if (targetSpot) {
+                    targetSpot.material.color.setHex(0x2196F3);
+                    targetSpot.material.emissive.setHex(0x2196F3);
+                    
+                    // Create a particle effect
+                    const particles = new THREE.BufferGeometry();
+                    const particleCount = 100;
+                    const posArray = new Float32Array(particleCount * 3);
+                    
+                    for (let i = 0; i < particleCount * 3; i++) {
+                        posArray[i] = (Math.random() - 0.5) * 2;
+                    }
+                    
+                    particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                    const particleMaterial = new THREE.PointsMaterial({
+                        size: 0.1,
+                        color: 0x2196F3,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    
+                    const particleSystem = new THREE.Points(particles, particleMaterial);
+                    particleSystem.position.copy(targetSpot.position);
+                    particleSystem.position.y += 1;
+                    scene.add(particleSystem);
+                    
+                    // Animate particles
+                    let particleTime = 0;
+                    const animateParticles = () => {
+                        particleTime += 0.01;
+                        const positions = particles.attributes.position.array;
+                        
+                        for (let i = 0; i < positions.length; i += 3) {
+                            positions[i] += (Math.random() - 0.5) * 0.02;
+                            positions[i+1] += Math.sin(particleTime + i) * 0.02 + 0.02;
+                            positions[i+2] += (Math.random() - 0.5) * 0.02;
+                        }
+                        
+                        particles.attributes.position.needsUpdate = true;
+                        
+                        if (particleTime < 2) {
+                            requestAnimationFrame(animateParticles);
+                        } else {
+                            scene.remove(particleSystem);
+                        }
+                    };
+                    
+                    animateParticles();
+                }
+                
+                // Reset button after delay
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-check-circle"></i> Reserve Another Spot';
+                    this.disabled = false;
+                }, 3000);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

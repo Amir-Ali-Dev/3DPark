@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Parking Map | 3D Smart Parking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #8b5cf6;
+            --dark: #111827;
+            --dark-gray: #6b7280;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --light-gray: #e5e7eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            padding: 20px 0;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 18px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--dark-gray);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background: #f3f4f6;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .notification-bell {
+            position: relative;
+            font-size: 20px;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Map Container */
+        .map-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin-bottom: 30px;
+            height: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #parking-map {
+            width: 100%;
+            height: 100%;
+            background-color: #e0e0e0;
+            position: relative;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .map-control-btn {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+
+        .map-control-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .floor-selector {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .floor-btn {
+            padding: 8px 16px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .floor-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .parking-spot {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            background: var(--success);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .parking-spot:hover {
+            transform: scale(1.1);
+        }
+
+        .parking-spot.reserved {
+            background: var(--danger);
+        }
+
+        .parking-spot.selected {
+            background: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+        }
+
+        .parking-spot.yours {
+            background: var(--warning);
+        }
+
+        /* Reservation Panel */
+        .reservation-panel {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .panel-content {
+            display: flex;
+            gap: 30px;
+        }
+
+        .spot-info {
+            flex: 1;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            width: 120px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .info-value {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        /* Time Selection */
+        .time-selection {
+            margin-top: 20px;
+        }
+
+        .time-slots {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary);
+        }
+
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .stat-title {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.up {
+            color: var(--success);
+        }
+
+        .stat-change.down {
+            color: var(--danger);
+        }
+
+        /* 3D Parking Badge */
+        .parking-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .map-container {
+                height: 400px;
+            }
+
+            .panel-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .map-controls {
+                top: 15px;
+                right: 15px;
+            }
+
+            .floor-selector {
+                bottom: 15px;
+            }
+
+            .action-btns {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-parking"></i>
+                </div>
+                <div class="sidebar-title">3D Smart Parking</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="dashboard.html" class="menu-link">
+                        <i class="fas fa-home menu-icon"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="profile.html" class="menu-link">
+                        <i class="fas fa-user menu-icon"></i>
+                        My Profile
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="reservations.html" class="menu-link">
+                        <i class="fas fa-calendar-check menu-icon"></i>
+                        My Reservations
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="payment.html" class="menu-link">
+                        <i class="fas fa-credit-card menu-icon"></i>
+                        Payments
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="vehicles.html" class="menu-link">
+                        <i class="fas fa-car menu-icon"></i>
+                        My Vehicles
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="3d-map.html" class="menu-link active">
+                        <i class="fas fa-map-marked-alt menu-icon"></i>
+                        3D Parking Map
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="settings.html" class="menu-link">
+                        <i class="fas fa-cog menu-icon"></i>
+                        Settings
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="logout.html" class="menu-link">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">3D Parking Map <span class="parking-badge"><i class="fas fa-cube"></i> INTERACTIVE</span></h1>
+                <div class="user-menu">
+                    <div class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-title">Available Spots</div>
+                    <div class="stat-value">24</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i>
+                        12% from yesterday
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Nearest Parking</div>
+                    <div class="stat-value">Floor 2</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-info-circle"></i>
+                        Closest to entrance
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Your Reservations</div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-change down">
+                        <i class="fas fa-arrow-down"></i>
+                        1 active today
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Average Price</div>
+                    <div class="stat-value">$3.50</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-clock"></i>
+                        per hour
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Map Container -->
+            <div class="map-container">
+                <div id="parking-map">
+                    <!-- Parking spots will be added dynamically with JavaScript -->
+                </div>
+                
+                <!-- Map Controls -->
+                <div class="map-controls">
+                    <div class="map-control-btn" id="zoom-in">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="map-control-btn" id="zoom-out">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <div class="map-control-btn" id="rotate-left">
+                        <i class="fas fa-undo"></i>
+                    </div>
+                    <div class="map-control-btn" id="rotate-right">
+                        <i class="fas fa-redo"></i>
+                    </div>
+                    <div class="map-control-btn" id="reset-view">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                </div>
+                
+                <!-- Floor Selector -->
+                <div class="floor-selector">
+                    <div class="floor-btn active" data-floor="1">Floor 1</div>
+                    <div class="floor-btn" data-floor="2">Floor 2</div>
+                    <div class="floor-btn" data-floor="3">Floor 3</div>
+                    <div class="floor-btn" data-floor="roof">Roof</div>
+                </div>
+            </div>
+
+            <!-- Reservation Panel -->
+            <div class="reservation-panel" id="reservation-panel" style="display: none;">
+                <div class="panel-header">
+                    <h2 class="panel-title">Reserve Parking Spot</h2>
+                    <button class="btn btn-outline" id="close-panel">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <div class="panel-content">
+                    <div class="spot-info">
+                        <div class="info-row">
+                            <div class="info-label">Spot Number</div>
+                            <div class="info-value" id="spot-number">P-102</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Floor</div>
+                            <div class="info-value" id="spot-floor">Floor 1</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Zone</div>
+                            <div class="info-value" id="spot-zone">Central Zone</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Size</div>
+                            <div class="info-value" id="spot-size">Standard (5m x 2.5m)</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Price</div>
+                            <div class="info-value" id="spot-price">$3.50/hour</div>
+                        </div>
+                    </div>
+                    
+                    <div class="time-selection">
+                        <h3 class="panel-title">Select Time</h3>
+                        <div class="time-slots">
+                            <div class="time-slot">30 min</div>
+                            <div class="time-slot selected">1 hour</div>
+                            <div class="time-slot">2 hours</div>
+                            <div class="time-slot">3 hours</div>
+                            <div class="time-slot">4 hours</div>
+                            <div class="time-slot">All day</div>
+                        </div>
+                        
+                        <div class="action-btns" style="margin-top: 30px;">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-check-circle"></i> Reserve Now
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-bookmark"></i> Save for Later
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the parking map with spots
+            const parkingMap = document.getElementById('parking-map');
+            const floorBtns = document.querySelectorAll('.floor-btn');
+            const reservationPanel = document.getElementById('reservation-panel');
+            const closePanelBtn = document.getElementById('close-panel');
+            
+            // Generate parking spots for different floors
+            function generateParkingSpots(floor) {
+                parkingMap.innerHTML = '';
+                
+                // Different layouts for different floors
+                if (floor === '1') {
+                    // Floor 1 layout
+                    createParkingSpot('P-101', 50, 50, false);
+                    createParkingSpot('P-102', 50, 120, false);
+                    createParkingSpot('P-103', 50, 190, true);
+                    createParkingSpot('P-104', 50, 260, false);
+                    createParkingSpot('P-105', 150, 50, false);
+                    createParkingSpot('P-106', 150, 120, false);
+                    createParkingSpot('P-107', 150, 190, false);
+                    createParkingSpot('P-108', 150, 260, true);
+                    createParkingSpot('P-109', 250, 50, false);
+                    createParkingSpot('P-110', 250, 120, false);
+                    createParkingSpot('P-111', 250, 190, false);
+                    createParkingSpot('P-112', 250, 260, false);
+                    createParkingSpot('P-113', 350, 50, false);
+                    createParkingSpot('P-114', 350, 120, false);
+                    createParkingSpot('P-115', 350, 190, false);
+                    createParkingSpot('P-116', 350, 260, false);
+                    createParkingSpot('P-117', 450, 50, false);
+                    createParkingSpot('P-118', 450, 120, true);
+                    createParkingSpot('P-119', 450, 190, false);
+                    createParkingSpot('P-120', 450, 260, false);
+                } else if (floor === '2') {
+                    // Floor 2 layout
+                    createParkingSpot('P-201', 50, 50, false);
+                    createParkingSpot('P-202', 50, 120, false);
+                    createParkingSpot('P-203', 50, 190, false);
+                    createParkingSpot('P-204', 50, 260, false);
+                    createParkingSpot('P-205', 150, 50, true);
+                    createParkingSpot('P-206', 150, 120, false);
+                    createParkingSpot('P-207', 150, 190, false);
+                    createParkingSpot('P-208', 150, 260, false);
+                    createParkingSpot('P-209', 250, 50, false);
+                    createParkingSpot('P-210', 250, 120, false);
+                    createParkingSpot('P-211', 250, 190, false);
+                    createParkingSpot('P-212', 250, 260, false);
+                    createParkingSpot('P-213', 350, 50, false);
+                    createParkingSpot('P-214', 350, 120, false);
+                    createParkingSpot('P-215', 350, 190, false);
+                    createParkingSpot('P-216', 350, 260, false);
+                    createParkingSpot('P-217', 450, 50, false);
+                    createParkingSpot('P-218', 450, 120, false);
+                    createParkingSpot('P-219', 450, 190, false);
+                    createParkingSpot('P-220', 450, 260, false);
+                } else if (floor === '3') {
+                    // Floor 3 layout
+                    createParkingSpot('P-301', 50, 50, false);
+                    createParkingSpot('P-302', 50, 120, false);
+                    createParkingSpot('P-303', 50, 190, false);
+                    createParkingSpot('P-304', 50, 260, false);
+                    createParkingSpot('P-305', 150, 50, false);
+                    createParkingSpot('P-306', 150, 120, false);
+                    createParkingSpot('P-307', 150, 190, false);
+                    createParkingSpot('P-308', 150, 260, false);
+                    createParkingSpot('P-309', 250, 50, false);
+                    createParkingSpot('P-310', 250, 120, false);
+                    createParkingSpot('P-311', 250, 190, false);
+                    createParkingSpot('P-312', 250, 260, false);
+                    createParkingSpot('P-313', 350, 50, false);
+                    createParkingSpot('P-314', 350, 120, false);
+                    createParkingSpot('P-315', 350, 190, false);
+                    createParkingSpot('P-316', 350, 260, false);
+                    createParkingSpot('P-317', 450, 50, false);
+                    createParkingSpot('P-318', 450, 120, false);
+                    createParkingSpot('P-319', 450, 190, false);
+                    createParkingSpot('P-320', 450, 260, false);
+                } else if (floor === 'roof') {
+                    // Roof layout
+                    createParkingSpot('P-R01', 50, 50, false);
+                    createParkingSpot('P-R02', 50, 120, false);
+                    createParkingSpot('P-R03', 50, 190, false);
+                    createParkingSpot('P-R04', 50, 260, false);
+                    createParkingSpot('P-R05', 150, 50, false);
+                    createParkingSpot('P-R06', 150, 120, false);
+                    createParkingSpot('P-R07', 150, 190, false);
+                    createParkingSpot('P-R08', 150, 260, false);
+                    createParkingSpot('P-R09', 250, 50, false);
+                    createParkingSpot('P-R10', 250, 120, false);
+                }
+            }
+            
+            // Create a parking spot element
+            function createParkingSpot(number, left, top, reserved) {
+                const spot = document.createElement('div');
+                spot.className = 'parking-spot';
+                spot.textContent = number;
+                spot.style.left = left + 'px';
+                spot.style.top = top + 'px';
+                
+                if (reserved) {
+                    spot.classList.add('reserved');
+                }
+                
+                // Mark one spot as "yours" (for demo purposes)
+                if (number === 'P-102') {
+                    spot.classList.add('yours');
+                }
+                
+                spot.addEventListener('click', function() {
+                    if (!this.classList.contains('reserved')) {
+                        // Remove selected class from all spots
+                        document.querySelectorAll('.parking-spot').forEach(s => {
+                            s.classList.remove('selected');
+                        });
+                        
+                        // Add selected class to clicked spot
+                        this.classList.add('selected');
+                        
+                        // Update reservation panel
+                        document.getElementById('spot-number').textContent = number;
+                        document.getElementById('spot-floor').textContent = 'Floor ' + document.querySelector('.floor-btn.active').dataset.floor;
+                        
+                        // Show reservation panel
+                        reservationPanel.style.display = 'block';
+                    }
+                });
+                
+                parkingMap.appendChild(spot);
+            }
+            
+            // Floor selection
+            floorBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    floorBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    generateParkingSpots(this.dataset.floor);
+                });
+            });
+            
+            // Initialize with floor 1
+            generateParkingSpots('1');
+            
+            // Close reservation panel
+            closePanelBtn.addEventListener('click', function() {
+                reservationPanel.style.display = 'none';
+                document.querySelectorAll('.parking-spot').forEach(s => {
+                    s.classList.remove('selected');
+                });
+            });
+            
+            // Time slot selection
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', function() {
+                    document.querySelectorAll('.time-slot').forEach(s => {
+                        s.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            });
+            
+            // Map controls (simplified for demo)
+            document.getElementById('zoom-in').addEventListener('click', function() {
+                alert('Zoom in functionality would be implemented here');
+            });
+            
+            document.getElementById('zoom-out').addEventListener('click', function() {
+                alert('Zoom out functionality would be implemented here');
+            });
+            
+            document.getElementById('rotate-left').addEventListener('click', function() {
+                alert('Rotate left functionality would be implemented here');
+            });
+            
+            document.getElementById('rotate-right').addEventListener('click', function() {
+                alert('Rotate right functionality would be implemented here');
+            });
+            
+            document.getElementById('reset-view').addEventListener('click', function() {
+                alert('Reset view functionality would be implemented here');
+            });
+            
+            // Notification bell
+            const notificationBell = document.querySelector('.notification-bell');
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function() {
+                    this.querySelector('.notification-badge').textContent = '0';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

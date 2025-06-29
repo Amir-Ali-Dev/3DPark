@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile | 3D Smart Parking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #8b5cf6;
+            --dark: #111827;
+            --dark-gray: #6b7280;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --light-gray: #e5e7eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            padding: 20px 0;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 18px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--dark-gray);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background: #f3f4f6;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .notification-bell {
+            position: relative;
+            font-size: 20px;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-right: 30px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .avatar-upload:hover {
+            background: var(--primary-dark);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .profile-email {
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .profile-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Profile Form */
+        .profile-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .profile-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .profile-form input, .profile-form select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .profile-form input:focus, .profile-form select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .save-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .save-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .stat-title {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.up {
+            color: var(--success);
+        }
+
+        .stat-change.down {
+            color: var(--danger);
+        }
+
+        /* Reservations History */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .view-all {
+            color: var(--primary);
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .reservations-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            background: var(--light-gray);
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .table-row {
+            display: flex;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            align-items: center;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .table-row:hover {
+            background: #f9fafb;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .col-1 { width: 15%; }
+        .col-2 { width: 20%; }
+        .col-3 { width: 20%; }
+        .col-4 { width: 15%; }
+        .col-5 { width: 15%; }
+        .col-6 { width: 15%; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background: rgba(156, 163, 175, 0.1);
+            color: var(--gray);
+        }
+
+        .status-canceled {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        /* 3D Parking Badge */
+        .parking-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-header {
+                display: none;
+            }
+
+            .table-row {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+                gap: 10px;
+            }
+
+            .col-1, .col-2, .col-3, .col-4, .col-5, .col-6 {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .col-1::before { content: "Reservation #: "; font-weight: 600; }
+            .col-2::before { content: "Date: "; font-weight: 600; }
+            .col-3::before { content: "Location: "; font-weight: 600; }
+            .col-4::before { content: "Vehicle: "; font-weight: 600; }
+            .col-5::before { content: "Status: "; font-weight: 600; }
+            .col-6 { justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-parking"></i>
+                </div>
+                <div class="sidebar-title">3D Smart Parking</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="dashboard.html" class="menu-link">
+                        <i class="fas fa-home menu-icon"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="profile.html" class="menu-link active">
+                        <i class="fas fa-user menu-icon"></i>
+                        My Profile
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="reservations.html" class="menu-link">
+                        <i class="fas fa-calendar-check menu-icon"></i>
+                        My Reservations
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="payment.html" class="menu-link">
+                        <i class="fas fa-credit-card menu-icon"></i>
+                        Payments
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="vehicles.html" class="menu-link">
+                        <i class="fas fa-car menu-icon"></i>
+                        My Vehicles
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="3d-map.html" class="menu-link">
+                        <i class="fas fa-map-marked-alt menu-icon"></i>
+                        3D Parking Map
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="settings.html" class="menu-link">
+                        <i class="fas fa-cog menu-icon"></i>
+                        Settings
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="logout.html" class="menu-link">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">My Profile <span class="parking-badge"><i class="fas fa-cube"></i> 3D PARKING</span></h1>
+                <div class="user-menu">
+                    <div class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-title">Active Reservations</div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i>
+                        20% from last month
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Reservations</div>
+                    <div class="stat-value">24</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i>
+                        15% from last month
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Monthly Payments</div>
+                    <div class="stat-value">$85.00</div>
+                    <div class="stat-change down">
+                        <i class="fas fa-arrow-down"></i>
+                        5% from last month
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">User Rating</div>
+                    <div class="stat-value">4.8</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-star"></i>
+                        Gold Member
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                        <div class="avatar-upload">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h2 class="profile-name">John Doe</h2>
+                        <div class="profile-email">john.doe@example.com</div>
+                        <span class="profile-badge">Verified Account</span>
+                    </div>
+                </div>
+
+                <form class="profile-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first-name">First Name</label>
+                            <input type="text" id="first-name" value="John">
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Last Name</label>
+                            <input type="text" id="last-name" value="Doe">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" value="john.doe@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" value="+1 (555) 123-4567">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="birthdate">Date of Birth</label>
+                        <input type="date" id="birthdate" value="1990-01-15">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender">
+                            <option value="male" selected>Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- Reservations History -->
+            <div class="section-header">
+                <h2 class="section-title">Recent Reservations</h2>
+                <a href="reservations.html" class="view-all">View All</a>
+            </div>
+            <div class="reservations-table">
+                <div class="table-header">
+                    <div class="col-1">Reservation #</div>
+                    <div class="col-2">Date & Time</div>
+                    <div class="col-3">Parking Location</div>
+                    <div class="col-4">Vehicle</div>
+                    <div class="col-5">Status</div>
+                    <div class="col-6">Action</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2458</div>
+                    <div class="col-2">Jun 15, 2023 - 10:30 AM</div>
+                    <div class="col-3">Central Parking - Floor 2</div>
+                    <div class="col-4">Toyota Camry - White</div>
+                    <div class="col-5">
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="col-6">
+                        <button class="action-btn">View <i class="fas fa-chevron-right" style="font-size: 10px; margin-left: 5px;"></i></button>
+                    </div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2391</div>
+                    <div class="col-2">Jun 10, 2023 - 2:00 PM</div>
+                    <div class="col-3">Business Parking - Floor 1</div>
+                    <div class="col-4">Honda Accord - Black</div>
+                    <div class="col-5">
+                        <span class="status-badge status-completed">Completed</span>
+                    </div>
+                    <div class="col-6">
+                        <button class="action-btn">View <i class="fas fa-chevron-right" style="font-size: 10px; margin-left: 5px;"></i></button>
+                    </div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2312</div>
+                    <div class="col-2">Jun 5, 2023 - 9:15 AM</div>
+                    <div class="col-3">Central Parking - Floor 3</div>
+                    <div class="col-4">Toyota Camry - White</div>
+                    <div class="col-5">
+                        <span class="status-badge status-canceled">Canceled</span>
+                    </div>
+                    <div class="col-6">
+                        <button class="action-btn">View <i class="fas fa-chevron-right" style="font-size: 10px; margin-left: 5px;"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Interactive Scripts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile picture upload
+            const avatarUpload = document.querySelector('.avatar-upload');
+            if (avatarUpload) {
+                avatarUpload.addEventListener('click', function() {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    
+                    input.onchange = e => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                const avatar = document.querySelector('.profile-avatar');
+                                avatar.innerHTML = '';
+                                const img = document.createElement('img');
+                                img.src = event.target.result;
+                                img.style.width = '100%';
+                                img.style.height = '100%';
+                                img.style.objectFit = 'cover';
+                                avatar.appendChild(img);
+                                avatar.appendChild(avatarUpload);
+                            }
+                            reader.readAsDataURL(file);
+                        }
+                    };
+                    
+                    input.click();
+                });
+            }
+
+            // Save profile form
+            const profileForm = document.querySelector('.profile-form');
+            if (profileForm) {
+                profileForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Show success notification
+                    const notification = document.createElement('div');
+                    notification.style.position = 'fixed';
+                    notification.style.top = '20px';
+                    notification.style.right = '20px';
+                    notification.style.backgroundColor = 'var(--success)';
+                    notification.style.color = 'white';
+                    notification.style.padding = '12px 20px';
+                    notification.style.borderRadius = '8px';
+                    notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                    notification.style.zIndex = '1000';
+                    notification.style.display = 'flex';
+                    notification.style.alignItems = 'center';
+                    notification.style.gap = '10px';
+                    notification.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        Profile updated successfully!
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                        notification.style.transition = 'opacity 0.5s';
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 500);
+                    }, 3000);
+                });
+            }
+
+            // Notification bell
+            const notificationBell = document.querySelector('.notification-bell');
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function() {
+                    // In a real app, this would show a dropdown with notifications
+                    this.querySelector('.notification-badge').textContent = '0';
+                });
+            }
+
+            // Responsive table enhancement
+            const tableRows = document.querySelectorAll('.table-row');
+            tableRows.forEach(row => {
+                row.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        // On mobile, show more details when a row is clicked
+                        this.classList.toggle('expanded');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

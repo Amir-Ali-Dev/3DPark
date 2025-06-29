@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reservations | 3D Smart Parking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #8b5cf6;
+            --dark: #111827;
+            --dark-gray: #6b7280;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --light-gray: #e5e7eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            padding: 20px 0;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 18px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--dark-gray);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background: #f3f4f6;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .notification-bell {
+            position: relative;
+            font-size: 20px;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .new-reservation-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .new-reservation-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Reservations Table */
+        .reservations-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            background: var(--light-gray);
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .table-row {
+            display: flex;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            align-items: center;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .table-row:hover {
+            background: #f9fafb;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .col-1 { width: 10%; }
+        .col-2 { width: 15%; }
+        .col-3 { width: 15%; }
+        .col-4 { width: 20%; }
+        .col-5 { width: 15%; }
+        .col-6 { width: 15%; }
+        .col-7 { width: 10%; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background: rgba(156, 163, 175, 0.1);
+            color: var(--gray);
+        }
+
+        .status-canceled {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .status-upcoming {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        .action-btn.danger {
+            color: var(--danger);
+        }
+
+        .action-btn.danger:hover {
+            color: #dc2626;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .page-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--light-gray);
+            background: white;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 3D Parking Badge */
+        .parking-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .filter-group {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-header {
+                display: none;
+            }
+
+            .table-row {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+                gap: 10px;
+            }
+
+            .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7 {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .col-1::before { content: "ID: "; font-weight: 600; }
+            .col-2::before { content: "Date: "; font-weight: 600; }
+            .col-3::before { content: "Time: "; font-weight: 600; }
+            .col-4::before { content: "Location: "; font-weight: 600; }
+            .col-5::before { content: "Vehicle: "; font-weight: 600; }
+            .col-6::before { content: "Status: "; font-weight: 600; }
+            .col-7 { justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-parking"></i>
+                </div>
+                <div class="sidebar-title">3D Smart Parking</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="dashboard.html" class="menu-link">
+                        <i class="fas fa-home menu-icon"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="profile.html" class="menu-link">
+                        <i class="fas fa-user menu-icon"></i>
+                        My Profile
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="reservations.html" class="menu-link active">
+                        <i class="fas fa-calendar-check menu-icon"></i>
+                        My Reservations
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="payment.html" class="menu-link">
+                        <i class="fas fa-credit-card menu-icon"></i>
+                        Payments
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="vehicles.html" class="menu-link">
+                        <i class="fas fa-car menu-icon"></i>
+                        My Vehicles
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="3d-map.html" class="menu-link">
+                        <i class="fas fa-map-marked-alt menu-icon"></i>
+                        3D Parking Map
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="settings.html" class="menu-link">
+                        <i class="fas fa-cog menu-icon"></i>
+                        Settings
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="logout.html" class="menu-link">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">My Reservations <span class="parking-badge"><i class="fas fa-cube"></i> 3D PARKING</span></h1>
+                <div class="user-menu">
+                    <div class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <span class="filter-label">Filter by:</span>
+                    <select class="filter-select">
+                        <option value="all">All Reservations</option>
+                        <option value="active">Active</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                        <option value="canceled">Canceled</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="all">All Vehicles</option>
+                        <option value="car1">Toyota Camry - White</option>
+                        <option value="car2">Honda Accord - Black</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="all">All Locations</option>
+                        <option value="central">Central Parking</option>
+                        <option value="business">Business Parking</option>
+                        <option value="premium">Premium Parking</option>
+                    </select>
+                </div>
+                <button class="new-reservation-btn">
+                    <i class="fas fa-plus"></i>
+                    New Reservation
+                </button>
+            </div>
+
+            <!-- Reservations Table -->
+            <div class="reservations-table">
+                <div class="table-header">
+                    <div class="col-1">ID</div>
+                    <div class="col-2">Date</div>
+                    <div class="col-3">Time</div>
+                    <div class="col-4">Location</div>
+                    <div class="col-5">Vehicle</div>
+                    <div class="col-6">Status</div>
+                    <div class="col-7">Action</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2458</div>
+                    <div class="col-2">Jun 15, 2023</div>
+                    <div class="col-3">10:30 AM - 2:30 PM</div>
+                    <div class="col-4">Central Parking - Floor 2 (Spot #42)</div>
+                    <div class="col-5">Toyota Camry - White</div>
+                    <div class="col-6">
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="col-7">
+                        <button class="action-btn">View</button>
+                    </div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2432</div>
+                    <div class="col-2">Jun 18, 2023</div>
+                    <div class="col-3">9:00 AM - 5:00 PM</div>
+                    <div class="col-4">Business Parking - Floor 1 (Spot #15)</div>
+                    <div class="col-5">Honda Accord - Black</div>
+                    <div class="col-6">
+                        <span class="status-badge status-upcoming">Upcoming</span>
+                    </div>
+                    <div class="col-7">
+                        <button class="action-btn danger">Cancel</button>
+                    </div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2391</div>
+                    <div class="col-2">Jun 10, 2023</div>
+                    <div class="col-3">2:00 PM - 6:00 PM</div>
+                    <div class="col-4">Business Parking - Floor 1 (Spot #22)</div>
+                    <div class="col-5">Honda Accord - Black</div>
+                    <div class="col-6">
+                        <span class="status-badge status-completed">Completed</span>
+                    </div>
+                    <div class="col-7">
+                        <button class="action-btn">View</button>
+                    </div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2376</div>
+                    <div class="col-2">Jun 8, 2023</div>
+                    <div class="col-3">11:00 AM - 3:00 PM</div>
+                    <div class="col-4">Premium Parking - Floor 3 (Spot #7)</div>
+                    <div class="col-5">Toyota Camry - White</div>
+                    <div class="col-6">
+                        <span class="status-badge status-completed">Completed</span>
+                    </div>
+                    <div class="col-7">
+                        <button class="action-btn">View</button>
+                    </div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="col-1">#PRK-2312</div>
+                    <div class="col-2">Jun 5, 2023</div>
+                    <div class="col-3">9:15 AM - 1:15 PM</div>
+                    <div class="col-4">Central Parking - Floor 3 (Spot #35)</div>
+                    <div class="col-5">Toyota Camry - White</div>
+                    <div class="col-6">
+                        <span class="status-badge status-canceled">Canceled</span>
+                    </div>
+                    <div class="col-7">
+                        <button class="action-btn">View</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="page-btn disabled">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterSelects = document.querySelectorAll('.filter-select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    // In a real app, this would filter the reservations
+                    console.log('Filter changed:', this.value);
+                });
+            });
+
+            // New reservation button
+            const newReservationBtn = document.querySelector('.new-reservation-btn');
+            if (newReservationBtn) {
+                newReservationBtn.addEventListener('click', function() {
+                    // In a real app, this would open a new reservation modal
+                    alert('Redirecting to new reservation page...');
+                });
+            }
+
+            // Cancel reservation button
+            const cancelButtons = document.querySelectorAll('.action-btn.danger');
+            cancelButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to cancel this reservation?')) {
+                        const row = this.closest('.table-row');
+                        const statusBadge = row.querySelector('.status-badge');
+                        statusBadge.classList.remove('status-upcoming');
+                        statusBadge.classList.add('status-canceled');
+                        statusBadge.textContent = 'Canceled';
+                        this.textContent = 'View';
+                        this.classList.remove('danger');
+                        
+                        // Show notification
+                        const notification = document.createElement('div');
+                        notification.style.position = 'fixed';
+                        notification.style.top = '20px';
+                        notification.style.right = '20px';
+                        notification.style.backgroundColor = 'var(--danger)';
+                        notification.style.color = 'white';
+                        notification.style.padding = '12px 20px';
+                        notification.style.borderRadius = '8px';
+                        notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                        notification.style.zIndex = '1000';
+                        notification.style.display = 'flex';
+                        notification.style.alignItems = 'center';
+                        notification.style.gap = '10px';
+                        notification.innerHTML = `
+                            <i class="fas fa-info-circle"></i>
+                            Reservation canceled successfully!
+                        `;
+                        document.body.appendChild(notification);
+                        
+                        setTimeout(() => {
+                            notification.style.opacity = '0';
+                            notification.style.transition = 'opacity 0.5s';
+                            setTimeout(() => {
+                                notification.remove();
+                            }, 500);
+                        }, 3000);
+                    }
+                });
+            });
+
+            // View reservation button
+            const viewButtons = document.querySelectorAll('.action-btn:not(.danger)');
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // In a real app, this would show reservation details
+                    alert('Showing reservation details...');
+                });
+            });
+
+            // Pagination buttons
+            const pageButtons = document.querySelectorAll('.page-btn:not(.disabled)');
+            pageButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (!this.classList.contains('active')) {
+                        document.querySelector('.page-btn.active').classList.remove('active');
+                        this.classList.add('active');
+                        // In a real app, this would load the selected page
+                    }
+                });
+            });
+
+            // Notification bell
+            const notificationBell = document.querySelector('.notification-bell');
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function() {
+                    this.querySelector('.notification-badge').textContent = '0';
+                });
+            }
+
+            // Responsive table row click
+            const tableRows = document.querySelectorAll('.table-row');
+            tableRows.forEach(row => {
+                row.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        this.classList.toggle('expanded');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

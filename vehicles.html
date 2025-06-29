@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Vehicles | 3D Smart Parking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #8b5cf6;
+            --dark: #111827;
+            --dark-gray: #6b7280;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --light-gray: #e5e7eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            padding: 20px 0;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 18px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--dark-gray);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background: #f3f4f6;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .notification-bell {
+            position: relative;
+            font-size: 20px;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Add Vehicle Button */
+        .add-vehicle-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .add-vehicle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Vehicle Cards */
+        .vehicles-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .vehicle-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .vehicle-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .vehicle-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+            margin-right: 15px;
+        }
+
+        .vehicle-info {
+            flex: 1;
+        }
+
+        .vehicle-model {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 3px;
+        }
+
+        .vehicle-plate {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .vehicle-details {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            color: var(--gray);
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .vehicle-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .action-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .action-btn.delete {
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .default-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--success);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Add Vehicle Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--gray);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 1px solid var(--light-gray);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+        }
+
+        /* 3D Parking Badge */
+        .parking-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .vehicles-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-parking"></i>
+                </div>
+                <div class="sidebar-title">3D Smart Parking</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="dashboard.html" class="menu-link">
+                        <i class="fas fa-home menu-icon"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="profile.html" class="menu-link">
+                        <i class="fas fa-user menu-icon"></i>
+                        My Profile
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="reservations.html" class="menu-link">
+                        <i class="fas fa-calendar-check menu-icon"></i>
+                        My Reservations
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="payment.html" class="menu-link">
+                        <i class="fas fa-credit-card menu-icon"></i>
+                        Payments
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="vehicles.html" class="menu-link active">
+                        <i class="fas fa-car menu-icon"></i>
+                        My Vehicles
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="3d-map.html" class="menu-link">
+                        <i class="fas fa-map-marked-alt menu-icon"></i>
+                        3D Parking Map
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="settings.html" class="menu-link">
+                        <i class="fas fa-cog menu-icon"></i>
+                        Settings
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="logout.html" class="menu-link">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">My Vehicles <span class="parking-badge"><i class="fas fa-cube"></i> 3D PARKING</span></h1>
+                <div class="user-menu">
+                    <div class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button class="add-vehicle-btn" id="addVehicleBtn">
+                <i class="fas fa-plus"></i>
+                Add New Vehicle
+            </button>
+
+            <div class="vehicles-container">
+                <!-- Vehicle Card 1 -->
+                <div class="vehicle-card">
+                    <span class="default-badge">DEFAULT</span>
+                    <div class="vehicle-card-header">
+                        <div class="vehicle-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="vehicle-info">
+                            <div class="vehicle-model">Toyota Camry</div>
+                            <div class="vehicle-plate">ABC-1234</div>
+                        </div>
+                    </div>
+                    <div class="vehicle-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Color</span>
+                            <span class="detail-value">White</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Year</span>
+                            <span class="detail-value">2020</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Sedan</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Size</span>
+                            <span class="detail-value">Medium</span>
+                        </div>
+                    </div>
+                    <div class="vehicle-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vehicle Card 2 -->
+                <div class="vehicle-card">
+                    <div class="vehicle-card-header">
+                        <div class="vehicle-icon">
+                            <i class="fas fa-truck-pickup"></i>
+                        </div>
+                        <div class="vehicle-info">
+                            <div class="vehicle-model">Ford F-150</div>
+                            <div class="vehicle-plate">XYZ-5678</div>
+                        </div>
+                    </div>
+                    <div class="vehicle-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Color</span>
+                            <span class="detail-value">Black</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Year</span>
+                            <span class="detail-value">2022</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Pickup Truck</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Size</span>
+                            <span class="detail-value">Large</span>
+                        </div>
+                    </div>
+                    <div class="vehicle-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vehicle Card 3 -->
+                <div class="vehicle-card">
+                    <div class="vehicle-card-header">
+                        <div class="vehicle-icon">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div class="vehicle-info">
+                            <div class="vehicle-model">Honda CBR500R</div>
+                            <div class="vehicle-plate">MOTO-2023</div>
+                        </div>
+                    </div>
+                    <div class="vehicle-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Color</span>
+                            <span class="detail-value">Red</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Year</span>
+                            <span class="detail-value">2023</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Motorcycle</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Size</span>
+                            <span class="detail-value">Small</span>
+                        </div>
+                    </div>
+                    <div class="vehicle-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Vehicle Modal -->
+    <div class="modal-overlay" id="vehicleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Vehicle</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <form id="vehicleForm">
+                <div class="form-group">
+                    <label for="vehicleModel">Model</label>
+                    <input type="text" id="vehicleModel" placeholder="e.g. Toyota Camry" required>
+                </div>
+                <div class="form-group">
+                    <label for="licensePlate">License Plate</label>
+                    <input type="text" id="licensePlate" placeholder="e.g. ABC-1234" required>
+                </div>
+                <div class="form-group">
+                    <label for="vehicleColor">Color</label>
+                    <input type="text" id="vehicleColor" placeholder="e.g. White" required>
+                </div>
+                <div class="form-group">
+                    <label for="vehicleYear">Year</label>
+                    <input type="number" id="vehicleYear" placeholder="e.g. 2020" min="1900" max="2025" required>
+                </div>
+                <div class="form-group">
+                    <label for="vehicleType">Vehicle Type</label>
+                    <select id="vehicleType" required>
+                        <option value="">Select type</option>
+                        <option value="sedan">Sedan</option>
+                        <option value="suv">SUV</option>
+                        <option value="truck">Truck</option>
+                        <option value="motorcycle">Motorcycle</option>
+                        <option value="van">Van</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vehicleSize">Vehicle Size</label>
+                    <select id="vehicleSize" required>
+                        <option value="">Select size</option>
+                        <option value="small">Small (Motorcycle)</option>
+                        <option value="compact">Compact</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                        <option value="oversized">Oversized</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="setAsDefault">
+                        Set as default vehicle
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Vehicle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal functionality
+            const addVehicleBtn = document.getElementById('addVehicleBtn');
+            const vehicleModal = document.getElementById('vehicleModal');
+            const closeModal = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const vehicleForm = document.getElementById('vehicleForm');
+
+            // Show modal
+            addVehicleBtn.addEventListener('click', function() {
+                vehicleModal.classList.add('active');
+            });
+
+            // Hide modal
+            function hideModal() {
+                vehicleModal.classList.remove('active');
+            }
+
+            closeModal.addEventListener('click', hideModal);
+            cancelBtn.addEventListener('click', hideModal);
+
+            // Close modal when clicking outside
+            vehicleModal.addEventListener('click', function(e) {
+                if (e.target === vehicleModal) {
+                    hideModal();
+                }
+            });
+
+            // Form submission
+            vehicleForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // In a real app, you would save the vehicle data here
+                // For demo purposes, we'll just show a success message and hide the modal
+                
+                // Show success notification
+                const notification = document.createElement('div');
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.backgroundColor = 'var(--success)';
+                notification.style.color = 'white';
+                notification.style.padding = '12px 20px';
+                notification.style.borderRadius = '8px';
+                notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                notification.style.zIndex = '1000';
+                notification.style.display = 'flex';
+                notification.style.alignItems = 'center';
+                notification.style.gap = '10px';
+                notification.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    Vehicle added successfully!
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 500);
+                }, 3000);
+                
+                // Reset form and hide modal
+                vehicleForm.reset();
+                hideModal();
+            });
+
+            // Delete vehicle buttons
+            const deleteButtons = document.querySelectorAll('.action-btn.delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const vehicleCard = this.closest('.vehicle-card');
+                    const vehicleName = vehicleCard.querySelector('.vehicle-model').textContent;
+                    
+                    if (confirm(`Are you sure you want to delete ${vehicleName}?`)) {
+                        // In a real app, you would make an API call to delete the vehicle
+                        vehicleCard.style.transform = 'scale(0.9)';
+                        vehicleCard.style.opacity = '0';
+                        setTimeout(() => {
+                            vehicleCard.remove();
+                            
+                            // Show notification
+                            const notification = document.createElement('div');
+                            notification.style.position = 'fixed';
+                            notification.style.top = '20px';
+                            notification.style.right = '20px';
+                            notification.style.backgroundColor = 'var(--danger)';
+                            notification.style.color = 'white';
+                            notification.style.padding = '12px 20px';
+                            notification.style.borderRadius = '8px';
+                            notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                            notification.style.zIndex = '1000';
+                            notification.style.display = 'flex';
+                            notification.style.alignItems = 'center';
+                            notification.style.gap = '10px';
+                            notification.innerHTML = `
+                                <i class="fas fa-trash"></i>
+                                Vehicle deleted successfully!
+                            `;
+                            document.body.appendChild(notification);
+                            
+                            setTimeout(() => {
+                                notification.style.opacity = '0';
+                                notification.style.transition = 'opacity 0.5s';
+                                setTimeout(() => {
+                                    notification.remove();
+                                }, 500);
+                            }, 3000);
+                        }, 300);
+                    }
+                });
+            });
+
+            // Set default vehicle
+            const vehicleCards = document.querySelectorAll('.vehicle-card');
+            vehicleCards.forEach(card => {
+                if (!card.querySelector('.default-badge')) {
+                    card.addEventListener('click', function(e) {
+                        // Only set as default if not clicking on action buttons
+                        if (!e.target.closest('.vehicle-actions')) {
+                            // In a real app, you would make an API call to set as default
+                            document.querySelectorAll('.default-badge').forEach(badge => badge.remove());
+                            
+                            const badge = document.createElement('span');
+                            badge.className = 'default-badge';
+                            badge.textContent = 'DEFAULT';
+                            this.insertAdjacentElement('afterbegin', badge);
+                            
+                            // Show notification
+                            const notification = document.createElement('div');
+                            notification.style.position = 'fixed';
+                            notification.style.top = '20px';
+                            notification.style.right = '20px';
+                            notification.style.backgroundColor = 'var(--success)';
+                            notification.style.color = 'white';
+                            notification.style.padding = '12px 20px';
+                            notification.style.borderRadius = '8px';
+                            notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                            notification.style.zIndex = '1000';
+                            notification.style.display = 'flex';
+                            notification.style.alignItems = 'center';
+                            notification.style.gap = '10px';
+                            notification.innerHTML = `
+                                <i class="fas fa-check-circle"></i>
+                                Default vehicle updated!
+                            `;
+                            document.body.appendChild(notification);
+                            
+                            setTimeout(() => {
+                                notification.style.opacity = '0';
+                                notification.style.transition = 'opacity 0.5s';
+                                setTimeout(() => {
+                                    notification.remove();
+                                }, 500);
+                            }, 3000);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
