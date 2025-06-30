@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Premium Parking | Next-Gen Reservation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #5a72f1;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --accent-dark: #2aa8d6;
+            --dark: #212529;
+            --dark-light: #343a40;
+            --light: #f8f9fa;
+            --light-dark: #e9ecef;
+            --success: #4ad66d;
+            --success-dark: #38b85a;
+            --warning: #f8961e;
+            --danger: #ef233c;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .preloader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--light-dark);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        
+        header.scrolled {
+            padding: 1rem 2rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .logo:hover {
+            transform: translateY(-2px);
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: var(--transition);
+        }
+        
+        nav ul {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: var(--transition);
+            position: relative;
+            padding: 0.5rem 0;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .nav-cta {
+            background: var(--primary);
+            color: white !important;
+            padding: 0.5rem 1.25rem !important;
+            border-radius: 8px;
+            margin-left: 1rem;
+        }
+        
+        .nav-cta:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .nav-cta::after {
+            display: none;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+        }
+        
+        main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 3rem;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #6c757d;
+            max-width: 700px;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-btns {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        #parking-container {
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+        }
+        
+        #parking-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .scene-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--dark);
+        }
+        
+        .control-btn:hover {
+            background: white;
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            color: var(--primary);
+        }
+        
+        .control-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .control-btn i {
+            font-size: 18px;
+        }
+        
+        .parking-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .parking-info i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .parking-info span {
+            font-weight: 600;
+        }
+        
+        .parking-info .available {
+            color: var(--success);
+        }
+        
+        .reservation-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        #reservation-panel {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            position: sticky;
+            top: 140px;
+            transition: var(--transition);
+        }
+        
+        #reservation-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+        
+        #reservation-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+        
+        #reservation-panel h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.75rem;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.9rem 1.25rem;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .date-selector {
+            position: relative;
+        }
+        
+        .date-selector::after {
+            content: '📅';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        
+        #time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+        
+        .time-slot {
+            padding: 0.9rem;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .time-slot:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 201, 240, 0.2);
+        }
+        
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        .time-slot.unavailable {
+            background: #f8f9fa;
+            color: #adb5bd;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .time-slot.unavailable::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--danger);
+            transform: rotate(-5deg);
+        }
+        
+        #confirm-reservation {
+            width: 100%;
+            padding: 1.1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 5px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        #confirm-reservation:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.4);
+        }
+        
+        #confirm-reservation.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        
+        #confirm-reservation.loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: var(--transition);
+            z-index: -1;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        
+        .feature-card:hover .feature-icon {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .feature-card:hover h3,
+        .feature-card:hover p {
+            color: white;
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 1.75rem;
+            transition: var(--transition);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+        
+        .feature-card p {
+            color: #6c757d;
+            line-height: 1.7;
+            transition: var(--transition);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+            text-align: center;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-weight: 600;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, var(--dark), var(--dark-light));
+            color: white;
+            padding: 4rem 2rem 2rem;
+            margin-top: 6rem;
+            position: relative;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%23212529" opacity=".25"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="%23212529" opacity=".5"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%23212529"/></svg>');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 3rem;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .footer-about p {
+            color: #adb5bd;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: var(--transition);
+        }
+        
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column li {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-column a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .footer-column a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .footer-column a i {
+            width: 20px;
+            color: var(--accent);
+        }
+        
+        .footer-contact li {
+            margin-bottom: 1.25rem;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+        
+        /* Animation classes */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+        
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+        
+        .delay-3 {
+            animation-delay: 0.6s;
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            margin-bottom: 10px;
+        }
+        
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2.5rem;
+            position: relative;
+            transform: translateY(20px);
+            transition: var(--transition);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #adb5bd;
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+        
+        /* Profile Dropdown Styles */
+        .user-profile {
+            margin-left: 20px;
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 8px;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .profile-name {
+            color: var(--dark);
+            font-weight: 500;
+            margin-right: 5px;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 250px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .profile-dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .dropdown-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .user-details h4 {
+            margin: 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .user-details p {
+            margin: 3px 0 0;
+            color: #777;
+            font-size: 13px;
+        }
+
+        .dropdown-options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .dropdown-options li a {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .dropdown-options li a:hover {
+            background-color: #f5f5f5;
+            color: #000;
+        }
+
+        .dropdown-options li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .reservation-section {
+                grid-template-columns: 1fr;
+            }
+            
+            #reservation-panel {
+                position: static;
+            }
+            
+            .features {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            nav {
+                width: 100%;
+            }
+            
+            nav ul {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .nav-cta {
+                margin-left: 0;
+                margin-top: 0.5rem;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            #parking-container {
+                height: 60vh;
+            }
+            
+            .feature-card {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-btns {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            #reservation-panel {
+                padding: 1.5rem;
+            }
+            
+            .time-slot {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Dark mode */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f8f9fa;
+        }
+        
+        body.dark-mode header {
+            background: rgba(33, 37, 41, 0.97);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode #reservation-panel,
+        body.dark-mode .feature-card,
+        body.dark-mode .stat-card,
+        body.dark-mode .form-control {
+            background: #2c3034;
+            color: #f8f9fa;
+        }
+        
+        body.dark-mode .form-control {
+            border-color: #495057;
+        }
+        
+        body.dark-mode .feature-card p,
+        body.dark-mode .stat-label {
+            color: #dee2e6;
+        }
+        
+        body.dark-mode .time-slot {
+            background: #343a40;
+            border-color: #495057;
+        }
+        
+        body.dark-mode .time-slot.unavailable {
+            background: #2c3034;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="loader"></div>
+        <p>Loading Parking Experience...</p>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="reservation-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal">&times;</button>
+            <h2>Reservation Confirmed!</h2>
+            <div id="modal-content">
+                <!-- Dynamically filled -->
+            </div>
+            <button class="btn btn-primary" id="modal-close-btn" style="margin-top: 2rem;">Done</button>
+        </div>
+    </div>
+
+<header id="main-header">
+    <a href="#" class="logo">
+        <div class="logo-icon">
+            <i class="fas fa-parking"></i>
+        </div>
+        <span>3DPark</span>
+    </a>
+    <nav>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#reservation">Reservation</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li id="auth-section">
+                <!-- Will be filled by JavaScript -->
+            </li>
+        </ul>
+    </nav>
+    <button class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </button>
+</header>
+    
+    <main>
+        <section class="hero">
+            <h1>Revolutionary 3D Parking Experience</h1>
+            <p>Visualize, navigate and reserve your parking spot with our cutting-edge 3D technology. Real-time availability, smart routing, and seamless booking.</p>
+            <div class="hero-btns">
+                <a href="#reservation" class="btn btn-primary">
+                    <i class="fas fa-calendar-alt"></i> Book Now
+                </a>
+                <a href="#features" class="btn btn-outline">
+                    <i class="fas fa-play-circle"></i> Watch Demo
+                </a>
+            </div>
+        </section>
+        
+        <div id="parking-container">
+            <canvas id="parking-canvas"></canvas>
+            <div class="parking-info">
+                <i class="fas fa-car"></i>
+                <span><span class="available">42</span> / 120 spots available</span>
+            </div>
+            <div class="scene-controls">
+                <button class="control-btn tooltip" id="reset-view" data-tooltip="Reset View">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button class="control-btn tooltip active" id="toggle-animation" data-tooltip="Toggle Animation">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button class="control-btn tooltip" id="toggle-lights" data-tooltip="Toggle Lights">
+                    <i class="fas fa-lightbulb"></i>
+                </button>
+                <button class="control-btn tooltip" id="toggle-grid" data-tooltip="Toggle Grid">
+                    <i class="fas fa-border-all"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card floating">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Customer Satisfaction</div>
+            </div>
+            <div class="stat-card floating delay-1">
+                <div class="stat-number">5,000+</div>
+                <div class="stat-label">Daily Reservations</div>
+            </div>
+            <div class="stat-card floating delay-2">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Availability</div>
+            </div>
+            <div class="stat-card floating delay-3">
+                <div class="stat-number">30s</div>
+                <div class="stat-label">Average Booking Time</div>
+            </div>
+        </div>
+        
+        <div class="reservation-section" id="reservation">
+            <div>
+                <h2>Interactive 3D Parking</h2>
+                <p>Our advanced 3D visualization lets you explore the parking facility before you arrive. Click and drag to rotate the view, scroll to zoom, and watch as our smart navigation system guides a virtual car to available spots.</p>
+                
+                <div class="features" id="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <h3>Smart Navigation</h3>
+                        <p>Our system automatically guides you to the best available spot based on your preferences and current availability, reducing search time by up to 70%.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>EV Charging</h3>
+                        <p>Reserve spots with electric vehicle charging stations and monitor your charging status in real-time through our mobile app integration.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>AI Assistance</h3>
+                        <p>Our AI learns your parking habits to suggest optimal times and locations for future reservations, with predictive availability forecasting.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Security</h3>
+                        <p>24/7 monitored parking with license plate recognition and motion-activated lighting for complete peace of mind.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reservation-panel">
+                <h2>Reserve Your Spot</h2>
+                <div class="form-group">
+                    <label for="reservation-date">Select Date</label>
+                    <div class="date-selector">
+                        <input type="date" id="reservation-date" class="form-control" min="">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Time Slot</label>
+                    <div id="time-slots">
+                        <!-- Generated dynamically -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="vehicle-type">Vehicle Type</label>
+                    <select id="vehicle-type" class="form-control">
+                        <option value="standard">Standard Vehicle</option>
+                        <option value="large">Large Vehicle</option>
+                        <option value="electric">Electric Vehicle</option>
+                        <option value="motorcycle">Motorcycle</option>
+                        <option value="disabled">Disabled Parking</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="license-plate">License Plate</label>
+                    <input type="text" id="license-plate" class="form-control" placeholder="Enter your license plate">
+                </div>
+                
+                <button id="confirm-reservation">
+                    <i class="fas fa-check-circle"></i> Confirm Reservation
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-column footer-about">
+                <h3>3DPark</h3>
+                <p>Revolutionizing parking with 3D visualization and AI-powered reservation systems. Making urban parking smarter, faster, and more efficient.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="#features"><i class="fas fa-chevron-right"></i> Features</a></li>
+                    <li><a href="#reservation"><i class="fas fa-chevron-right"></i> Pricing</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Help Center</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> FAQs</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-contact">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-map-marker-alt"></i> 123 Park Ave, City</a></li>
+                    <li><a href="tel:+1234567890"><i class="fas fa-phone"></i> (123) 456-7890</a></li>
+                    <li><a href="mailto:info@3dpark.com"><i class="fas fa-envelope"></i> info@3dpark.com</a></li>
+                    <li><a href="#"><i class="fas fa-clock"></i> Mon-Fri: 8AM-8PM</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2023 3DPark. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #ef233c;"></i> for better urban mobility
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+    <script>
+        // User state management
+        const authSection = document.getElementById('auth-section');
+        
+        // Check if user is logged in (in a real app, this would check localStorage or make an API call)
+        const isLoggedIn = () => {
+            // For demo purposes, we'll use localStorage
+            return localStorage.getItem('isLoggedIn') === 'true';
+        };
+        
+        // Get user data (in a real app, this would come from an API)
+        const getUserData = () => {
+            return {
+                name: localStorage.getItem('userName') || 'John Doe',
+                email: localStorage.getItem('userEmail') || 'john.doe@example.com',
+                avatar: localStorage.getItem('userAvatar') || 'https://i.pravatar.cc/150?img=3'
+            };
+        };
+        
+        // Render auth section based on login state
+        const renderAuthSection = () => {
+            if (isLoggedIn()) {
+                const user = getUserData();
+                authSection.innerHTML = `
+                    <li class="user-profile">
+                        <div class="profile-dropdown">
+                            <button class="profile-btn">
+                                <img src="${user.avatar}" alt="User Avatar" class="profile-avatar">
+                                <span class="profile-name">${user.name}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <div class="profile-info">
+                                    <img src="${user.avatar}" alt="User Avatar" class="dropdown-avatar">
+                                    <div class="user-details">
+                                        <h4>${user.name}</h4>
+                                        <p>${user.email}</p>
+                                    </div>
+                                </div>
+                                <ul class="dropdown-options">
+                                    <li><a href="./dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                `;
+                
+                // Add logout handler
+                document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userAvatar');
+                    renderAuthSection();
+                });
+            } else {
+                authSection.innerHTML = `
+                    <li><a href="./register.html" class="nav-cta">Get Started</a></li>
+                `;
+            }
+        };
+        
+        // For demo purposes - simulate login
+        const simulateLogin = () => {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userName', 'John Doe');
+            localStorage.setItem('userEmail', 'john.doe@example.com');
+            localStorage.setItem('userAvatar', 'https://i.pravatar.cc/150?img=3');
+            renderAuthSection();
+        };
+        
+        // Initialize auth section
+        renderAuthSection();
+        
+        // Preloader
+        window.addEventListener('load', function() {
+            const preloader = document.querySelector('.preloader');
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+                document.querySelector('main').style.opacity = '1';
+            }, 1500);
+        });
+
+        // Header scroll effect
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Set min date for reservation to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('reservation-date').min = today;
+
+        // Generate time slots
+        const timeSlotsContainer = document.getElementById('time-slots');
+        const generateTimeSlots = () => {
+            timeSlotsContainer.innerHTML = '';
+            const hours = [];
+            
+            // Generate hours from 6AM to 10PM
+            for (let i = 6; i <= 22; i++) {
+                const hour = i > 12 ? i - 12 : i;
+                const ampm = i >= 12 ? 'PM' : 'AM';
+                hours.push(`${hour}:00 ${ampm}`);
+                if (i !== 22) {
+                    hours.push(`${hour}:30 ${ampm}`);
+                }
+            }
+            
+            // Randomly mark some slots as unavailable
+            hours.forEach(slot => {
+                const slotEl = document.createElement('div');
+                slotEl.classList.add('time-slot');
+                slotEl.textContent = slot;
+                
+                // 20% chance to be unavailable
+                if (Math.random() < 0.2) {
+                    slotEl.classList.add('unavailable');
+                }
+                
+                slotEl.addEventListener('click', function() {
+                    if (!this.classList.contains('unavailable')) {
+                        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                        this.classList.add('selected');
+                    }
+                });
+                
+                timeSlotsContainer.appendChild(slotEl);
+            });
+        };
+        
+        generateTimeSlots();
+
+        // Reservation form submission
+        document.getElementById('confirm-reservation').addEventListener('click', function() {
+            // Check if user is logged in
+            if (!isLoggedIn()) {
+                alert('Please register or login to make a reservation');
+                return;
+            }
+            
+            const date = document.getElementById('reservation-date').value;
+            const selectedSlot = document.querySelector('.time-slot.selected');
+            const vehicleType = document.getElementById('vehicle-type').value;
+            const licensePlate = document.getElementById('license-plate').value;
+            
+            if (!date || !selectedSlot || !licensePlate) {
+                alert('Please fill all fields and select a time slot');
+                return;
+            }
+            
+            this.classList.add('loading');
+            this.innerHTML = '<i class="fas fa-spinner"></i> Processing...';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Show modal with reservation details
+                const modal = document.getElementById('reservation-modal');
+                const modalContent = document.getElementById('modal-content');
+                
+                modalContent.innerHTML = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <p><strong>Date:</strong> ${new Date(date).toDateString()}</p>
+                        <p><strong>Time:</strong> ${selectedSlot.textContent}</p>
+                        <p><strong>Vehicle Type:</strong> ${document.getElementById('vehicle-type').options[document.getElementById('vehicle-type').selectedIndex].text}</p>
+                        <p><strong>License Plate:</strong> ${licensePlate}</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                        <p><i class="fas fa-qrcode" style="margin-right: 0.5rem;"></i> <strong>Reservation ID:</strong> 3DP-${Math.floor(100000 + Math.random() * 900000)}</p>
+                    </div>
+                    <p style="margin-top: 1.5rem; color: var(--success); font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Your spot has been reserved!
+                    </p>
+                `;
+                
+                modal.classList.add('active');
+                
+                // Reset button
+                const btn = document.getElementById('confirm-reservation');
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Reservation';
+                
+                // Generate new time slots (simulating changing availability)
+                generateTimeSlots();
+            }, 2000);
+        });
+
+        // Modal close
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('reservation-modal').classList.remove('active');
+        });
+        
+        document.getElementById('modal-close-btn').addEventListener('click', function() {
+            document.getElementById('reservation-modal').classList.remove('active');
+        });
+
+        // 3D Parking Scene (Simplified version)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Scene setup
+            const container = document.getElementById('parking-container');
+            const canvas = document.getElementById('parking-canvas');
+            
+            // Set canvas size
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Scene
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xe4e8f0);
+            
+            // Camera
+            const camera = new THREE.PerspectiveCamera(
+                75, 
+                canvas.width / canvas.height, 
+                0.1, 
+                1000
+            );
+            camera.position.set(0, 20, 30);
+            
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true
+            });
+            renderer.setSize(canvas.width, canvas.height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            scene.add(directionalLight);
+            
+            // Grid helper
+            const gridHelper = new THREE.GridHelper(50, 50, 0x888888, 0xcccccc);
+            scene.add(gridHelper);
+            
+            // Parking lot
+            const parkingGeometry = new THREE.BoxGeometry(40, 0.2, 20);
+            const parkingMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x333333,
+                roughness: 0.7,
+                metalness: 0.1
+            });
+            const parkingLot = new THREE.Mesh(parkingGeometry, parkingMaterial);
+            parkingLot.rotation.x = -Math.PI / 2;
+            scene.add(parkingLot);
+            
+            // Parking spots
+            const spotMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x4CAF50,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            for (let i = -8; i <= 8; i += 4) {
+                for (let j = -9; j <= 9; j += 3) {
+                    const spotGeometry = new THREE.BoxGeometry(2.8, 0.1, 4.5);
+                    const spot = new THREE.Mesh(spotGeometry, spotMaterial.clone());
+                    spot.position.set(j, 0.11, i);
+                    scene.add(spot);
+                }
+            }
+            
+            // Cars
+            const carGeometry = new THREE.BoxGeometry(3, 1.5, 2);
+            const carMaterial = new THREE.MeshStandardMaterial({ color: 0x4361ee });
+            
+            // Add some parked cars
+            for (let i = 0; i < 5; i++) {
+                const car = new THREE.Mesh(carGeometry, carMaterial);
+                car.position.set(
+                    -9 + Math.random() * 18,
+                    0.75,
+                    -8 + Math.random() * 16
+                );
+                car.rotation.y = Math.random() * Math.PI * 2;
+                scene.add(car);
+            }
+            
+            // Main car (user's car)
+            const mainCar = new THREE.Mesh(carGeometry, carMaterial);
+            mainCar.position.set(-25, 0.75, 0);
+            scene.add(mainCar);
+            
+            // Orbit controls
+            const controls = new THREE.OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 10;
+            controls.maxDistance = 50;
+            
+            // Animation variables
+            let carMoving = true;
+            let carPosition = -25;
+            let targetSpot = null;
+            
+            // Animation loop
+            const animate = () => {
+                requestAnimationFrame(animate);
+                
+                // Car animation
+                if (carMoving) {
+                    if (carPosition < 25) {
+                        carPosition += 0.1;
+                        mainCar.position.x = carPosition;
+                    } else {
+                        carPosition = -25;
+                    }
+                }
+                
+                controls.update();
+                renderer.render(scene, camera);
+            };
+            
+            animate();
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                camera.aspect = canvas.width / canvas.height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.width, canvas.height);
+            });
+            
+            // Control buttons
+            document.getElementById('reset-view').addEventListener('click', () => {
+                controls.reset();
+                camera.position.set(0, 20, 30);
+            });
+            
+            document.getElementById('toggle-animation').addEventListener('click', function() {
+                carMoving = !carMoving;
+                this.classList.toggle('active');
+                this.innerHTML = carMoving ? 
+                    '<i class="fas fa-pause"></i>' : 
+                    '<i class="fas fa-play"></i>';
+            });
+            
+            document.getElementById('toggle-lights').addEventListener('click', function() {
+                ambientLight.intensity = ambientLight.intensity === 0.6 ? 0.2 : 0.6;
+                directionalLight.intensity = directionalLight.intensity === 0.8 ? 0.3 : 0.8;
+                this.classList.toggle('active');
+            });
+            
+            document.getElementById('toggle-grid').addEventListener('click', function() {
+                gridHelper.visible = !gridHelper.visible;
+                this.classList.toggle('active');
+            });
+        });
+        
+        // For demo purposes - simulate login after 3 seconds
+        setTimeout(simulateLogin, 3000);
+    </script>
+</body>
+</html>
